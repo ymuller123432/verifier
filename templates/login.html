@@ -1,23 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-5">
-    <div class="card p-4">
-      <h4 class="mb-3">Sign in</h4>
-      <form method="post" action="{{ url_for('login_post') }}">
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input class="form-control" name="email" type="email" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Password</label>
-          <input class="form-control" name="password" type="password" required>
-        </div>
-        <button class="btn btn-primary w-100" type="submit">Login</button>
-      </form>
-      <div class="text-secondary small mt-3">
-        Admin is created via Heroku config vars <code>ADMIN_EMAIL</code> and <code>ADMIN_PASSWORD</code> (recommended), or via <code>heroku run</code>.
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-logo">V</div>
+      <div>
+        <div class="auth-title">Verifier</div>
+        <div class="auth-subtitle">Sign in to continue</div>
       </div>
+    </div>
+
+    <form method="post" action="{{ url_for('login_post') }}" class="mt-3">
+      <div class="mb-3">
+        <label class="form-label auth-label">Email</label>
+        <input class="form-control auth-input" name="email" type="email" placeholder="name@domain.com" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label auth-label">Password</label>
+        <input class="form-control auth-input" name="password" type="password" placeholder="••••••••" required>
+      </div>
+
+      <button class="btn btn-primary w-100 auth-btn" type="submit">Login</button>
+    </form>
+
+    <div class="auth-footnote">
+      Authorized access only.
     </div>
   </div>
 </div>
