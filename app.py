@@ -14,6 +14,7 @@ from extensions import db, login_manager
 from models import User, BulkTask, BulkResult
 from verify import verify_quick
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -94,27 +95,32 @@ def create_app():
     def bulk_upload_post():
         f = request.files.get("file")
         if not f:
-            flash("Upload a CSV file", "warning")
+            flash("Upload a CSV or TXT file", "warning")
             return redirect(url_for("bulk_upload_page"))
 
         filename = (f.filename or "").lower()
-content = f.read().decode("utf-8", errors="ignore")
+        content = f.read().decode("utf-8", errors="ignore")
 
-emails = []
+        emails = []
 
-# Support .txt (one email per line) and .csv (first column emails)
-if filename.endswith(".txt"):
-    for line in content.splitlines():
-        line = line.strip()
-        if line:
-            emails.append(line)
-else:
-    reader = csv.reader(io.StringIO(content))
-    for row in reader:
-        if row and row[0].strip():
-            emails.append(row[0].strip())
+        # Support .txt (one email per line) and .csv (first column emails)
+        if filename.endswith(".txt"):
+            for line in content.splitlines():
+                line = line.strip()
+                if line:
+                    emails.append(line)
+        else:
+            reader = csv.reader(io.StringIO(content))
+            for row in reader:
+                if row and row[0].strip():
+                    emails.append(row[0].strip())
 
-        task = BulkTask(created_by=current_user.get_user().id, status="queued", total=len(emails), processed=0)
+        task = BulkTask(
+            created_by=current_user.get_user().id,
+            status="queued",
+            total=len(emails),
+            processed=0
+        )
         db.session.add(task)
         db.session.commit()
 
@@ -141,46 +147,42 @@ else:
             abort(404)
 
         fmt = (fmt or "csv").lower()
-if fmt not in {"csv", "txt"}:
-    abort(400)
+        if fmt not in {"csv", "txt"}:
+            abort(400)
 
-output = io.StringIO()
+        output = io.StringIO()
 
-if fmt == "csv":
-    w = csv.writer(output)
-    w.writerow(["email", "status", "reason"])
-    for r in BulkResult.query.filter_by(task_id=task_id).yield_per(1000):
-        w.writerow([r.email, r.status, r.reason or ""])
+        if fmt == "csv":
+            w = csv.writer(output)
+            w.writerow(["email", "status", "reason"])
+            for r in BulkResult.query.filter_by(task_id=task_id).yield_per(1000):
+                w.writerow([r.email, r.status, r.reason or ""])
 
-    data = output.getvalue().encode("utf-8")
-    mem = io.BytesIO(data)
-    mem.seek(0)
-    return send_file(
-        mem,
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name=f"bulk_task_{task_id}.csv",
-    )
+            data = output.getvalue().encode("utf-8")
+            mem = io.BytesIO(data)
+            mem.seek(0)
+            return send_file(
+                mem,
+                mimetype="text/csv",
+                as_attachment=True,
+                download_name=f"bulk_task_{task_id}.csv",
+            )
 
-# TXT export: tab-separated for readability
-output.write("email	status	reason
-")
-for r in BulkResult.query.filter_by(task_id=task_id).yield_per(1000):
-    reason = (r.reason or "").replace("
-", " ").replace("	", " ")
-    output.write(f"{r.email}	{r.status}	{reason}
-")
+        # TXT export: tab-separated for readability
+        output.write("email\tstatus\treason\n")
+        for r in BulkResult.query.filter_by(task_id=task_id).yield_per(1000):
+            reason = (r.reason or "").replace("\n", " ").replace("\t", " ")
+            output.write(f"{r.email}\t{r.status}\t{reason}\n")
 
-data = output.getvalue().encode("utf-8")
-mem = io.BytesIO(data)
-mem.seek(0)
-return send_file(
-    mem,
-    mimetype="text/plain",
-    as_attachment=True,
-    download_name=f"bulk_task_{task_id}.txt",
-)
-
+        data = output.getvalue().encode("utf-8")
+        mem = io.BytesIO(data)
+        mem.seek(0)
+        return send_file(
+            mem,
+            mimetype="text/plain",
+            as_attachment=True,
+            download_name=f"bulk_task_{task_id}.txt",
+        )
 
     # ---------- USERS (Admin only) ----------
     @app.get("/admin/users")
@@ -235,6 +237,7 @@ return send_file(
             print("Created admin:", email)
 
     return app
+
 
 app = create_app()
 
