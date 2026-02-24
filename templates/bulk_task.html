@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <h5>Bulk Task #{{ task.id }}</h5>
+    <div class="d-flex gap-2">
+    <a class="btn btn-outline-light btn-sm" href="{{ url_for('bulk_export', task_id=task.id, fmt='csv') }}">Export CSV</a>
+    <a class="btn btn-outline-light btn-sm" href="{{ url_for('bulk_export', task_id=task.id, fmt='txt') }}">Export TXT</a>
+  </div>
+  </div>
+  <p class="mt-2">
+    Status: <b>{{ task.status }}</b> |
+    {{ task.processed }}/{{ task.total }}
+    {% if task.error %}
+      <span class="text-danger">| {{ task.error }}</span>
+    {% endif %}
+  </p>
+
+  <div class="table-responsive">
+    <table class="table table-sm">
+      <thead><tr><th>Email</th><th>Status</th><th>Reason</th></tr></thead>
+      <tbody>
+        {% for r in results %}
+          <tr><td>{{ r.email }}</td><td>{{ r.status }}</td><td>{{ r.reason }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-secondary small mt-2">
+    Showing first 250 results in UI. Export CSV for full output.
+  </div>
+</div>
+{% endblock %}

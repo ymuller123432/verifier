@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card p-4">
+      <h5>Create User</h5>
+      <form method="post" action="{{ url_for('users_create') }}">
+        <div class="mb-2">
+          <label class="form-label">Email</label>
+          <input class="form-control" name="email" type="email" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Password</label>
+          <input class="form-control" name="password" type="text" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Role</label>
+          <select class="form-select" name="role">
+            <option value="operator">operator (your friend)</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+        <button class="btn btn-success">Create</button>
+      </form>
+      <div class="text-secondary small mt-2">
+        Operator can verify & run bulk tasks. Admin can also create users.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card p-4">
+      <h5>Users</h5>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead><tr><th>Email</th><th>Role</th><th>Active</th><th>Created</th></tr></thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td>{{ u.email }}</td>
+                <td>{{ u.role }}</td>
+                <td>{{ "yes" if u.is_active else "no" }}</td>
+                <td>{{ u.created_at }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

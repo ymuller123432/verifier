@@ -1,0 +1,12 @@
+.bg-soft {
+  background: radial-gradient(circle at 20% 10%, #101820 0%, #0b1220 35%, #070b12 100%);
+  color: #e9eef6;
+}
+.card {
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+}
+.table { color: #e9eef6; }
+.text-secondary { color: rgba(233,238,246,.75) !important; }

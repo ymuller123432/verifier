@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card p-4">
+      <h4 class="mb-3">Sign in</h4>
+      <form method="post" action="{{ url_for('login_post') }}">
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input class="form-control" name="email" type="email" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input class="form-control" name="password" type="password" required>
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Login</button>
+      </form>
+      <div class="text-secondary small mt-3">
+        Admin is created via Heroku config vars <code>ADMIN_EMAIL</code> and <code>ADMIN_PASSWORD</code> (recommended), or via <code>heroku run</code>.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

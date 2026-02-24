@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-4">
+      <h5>Single Verify</h5>
+      <form method="post" action="{{ url_for('verify_one') }}" class="d-flex gap-2">
+        <input class="form-control" name="email" placeholder="name@example.com" required>
+        <button class="btn btn-success">Verify</button>
+      </form>
+      <div class="text-secondary small mt-2">
+        Quick checks: syntax + disposable + role + MX.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-4">
+      <h5>Recent Bulk Tasks</h5>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead><tr><th>ID</th><th>Status</th><th>Processed</th><th></th></tr></thead>
+          <tbody>
+            {% for t in tasks %}
+              <tr>
+                <td>{{ t.id }}</td>
+                <td>{{ t.status }}</td>
+                <td>{{ t.processed }}/{{ t.total }}</td>
+                <td><a class="btn btn-sm btn-outline-light" href="{{ url_for('bulk_task_view', task_id=t.id) }}">View</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
