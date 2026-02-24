@@ -1,6 +1,7 @@
 import csv
 import io
 import os
+import ssl
 
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort
 from flask_login import login_user, logout_user, login_required, current_user, UserMixin
@@ -22,8 +23,17 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
 
-    # Redis queue
-    r = redis.from_url(app.config["REDIS_URL"])
+    # (Optional) remove Flask-Login default "Please log in..." message
+    login_manager.login_message = None
+    login_manager.needs_refresh_message = None
+
+    # Redis queue (Heroku KVS may use self-signed certs on rediss://)
+    redis_url = app.config["REDIS_URL"]
+    redis_kwargs = {}
+    if redis_url.startswith("rediss://"):
+        redis_kwargs["ssl_cert_reqs"] = ssl.CERT_NONE
+
+    r = redis.from_url(redis_url, **redis_kwargs)
     q = Queue("bulk", connection=r)
 
     class LoginUser(UserMixin):
@@ -31,10 +41,13 @@ def create_app():
             self.id = u.id
             self.email = u.email
             self.role = u.role
-            self.is_active = u.is_active
+            self._active = bool(u.is_active)
 
         def get_user(self):
             return db.session.get(User, int(self.id))
+
+        def is_active(self):
+            return self._active
 
     @login_manager.user_loader
     def load_user(user_id):
